@@ -70,15 +70,15 @@ Input
 
 ## Technology Stack
 
-| Component              | Technology                        |
-|------------------------|-----------------------------------|
-| Image model            | EfficientNet-B0 (CNN)             |
-| Model weights          | Hosted on Hugging Face            |
-| Structured data model  | XGBoost                           |
-| Fusion strategy        | Weighted averaging                |
-| Vector search          | FAISS                             |
-| Explanation generation | LLM + RAG (knowledge_base/)       |
-| Containerization       | Docker / docker-compose           |
+| Component              | Technology                  |
+|------------------------|-----------------------------|
+| Image model            | EfficientNet-B0 (CNN)       |
+| Model weights          | Hugging Face                |
+| Structured data model  | XGBoost                     |
+| Fusion strategy        | Weighted averaging          |
+| Vector search          | FAISS                       |
+| Explanation generation | LLM + RAG (knowledge_base/) |
+| Containerization       | Docker / docker-compose     |
 
 ---
 
@@ -86,44 +86,62 @@ Input
 
 ```
 OSTEOPOROSIS/
-├── faiss_index/                   # FAISS vector index for RAG retrieval
-├── knowledge_base/                # Clinical documents used for RAG context
-├── archive/                       # Archived experiments and outputs
-├── cnn.py                         # EfficientNet-B0 inference pipeline
-├── xg_boost.py                    # XGBoost inference pipeline
-├── fusion.py                      # Weighted fusion of modality predictions
-├── llm.py                         # RAG-based clinical explanation generator
-├── main.py                        # Main entry point
-├── osteoporosis.csv               # Clinical training/evaluation dataset
-├── cnn_image_branch_scores.csv    # CNN prediction output scores
-├── xgb_text_branch_scores.csv     # XGBoost prediction output scores
-├── efficientnetb0_osteoporosis.pth  # (Local) CNN model weights — see Hugging Face
-├── xg_model.joblib                # Serialized XGBoost model
-├── label_encoders.joblib          # Fitted label encoders for clinical features
-├── requirements.txt               # Python dependencies
-├── Dockerfile                     # Container definition
-├── docker-compose.yml             # Multi-service container orchestration
+├── faiss_index/                     # FAISS vector index for RAG retrieval
+├── knowledge_base/                  # Clinical documents used for RAG context
+├── archive/                         # Archived experiments and outputs
+├── cnn.py                           # EfficientNet-B0 inference pipeline
+├── xg_boost.py                      # XGBoost inference pipeline
+├── fusion.py                        # Weighted fusion of modality predictions
+├── llm.py                           # RAG-based clinical explanation generator
+├── main.py                          # Main entry point
+├── osteoporosis.csv                 # Clinical training/evaluation dataset
+├── cnn_image_branch_scores.csv      # CNN prediction output scores
+├── xgb_text_branch_scores.csv       # XGBoost prediction output scores
+├── efficientnetb0_osteoporosis.pth  # CNN model weights (download from HF)
+├── xg_model.joblib                  # XGBoost model (download from HF)
+├── label_encoders.joblib            # Fitted label encoders (download from HF)
+├── requirements.txt                 # Python dependencies
+├── Dockerfile                       # Container definition
+├── docker-compose.yml               # Multi-service container orchestration
 ├── .dockerignore
 └── .gitignore
 ```
 
 ---
 
-## Model Weights
+## Hugging Face Model Repository
 
-The EfficientNet-B0 model weights (`efficientnetb0_osteoporosis.pth`) are hosted on Hugging Face due to file size constraints.
+Large model files and supporting assets are hosted on Hugging Face at:  
+**[darkthanos/osteoporosis-models](https://huggingface.co/darkthanos/osteoporosis-models)**
 
-Download before running:
+| File                              | Size    | Description                          |
+|-----------------------------------|---------|--------------------------------------|
+| `efficientnetb0_osteoporosis.pth` | 17 MB   | EfficientNet-B0 CNN weights          |
+| `xg_model.joblib`                 | 1.92 MB | Trained XGBoost model                |
+| `label_encoders.joblib`           | 3.47 kB | Fitted label encoders for clinical features |
+| `faiss_index/`                    | —       | FAISS vector index for RAG retrieval |
+| `knowledge_base/`                 | —       | Clinical knowledge base documents    |
 
-```bash
-# Using huggingface_hub
-python -c "
-from huggingface_hub import hf_hub_download
-hf_hub_download(repo_id='<your-hf-repo>', filename='efficientnetb0_osteoporosis.pth', local_dir='.')
-"
+### Downloading Model Files
+
+```python
+from huggingface_hub import snapshot_download
+
+snapshot_download(
+    repo_id="darkthanos/osteoporosis-models",
+    local_dir="."
+)
 ```
 
-> Replace `<your-hf-repo>` with the actual Hugging Face repository path.
+Or download individual files:
+
+```python
+from huggingface_hub import hf_hub_download
+
+hf_hub_download(repo_id="darkthanos/osteoporosis-models", filename="efficientnetb0_osteoporosis.pth", local_dir=".")
+hf_hub_download(repo_id="darkthanos/osteoporosis-models", filename="xg_model.joblib", local_dir=".")
+hf_hub_download(repo_id="darkthanos/osteoporosis-models", filename="label_encoders.joblib", local_dir=".")
+```
 
 ---
 
@@ -133,6 +151,15 @@ hf_hub_download(repo_id='<your-hf-repo>', filename='efficientnetb0_osteoporosis.
 
 ```bash
 pip install -r requirements.txt
+```
+
+### Download Model Weights
+
+```bash
+python -c "
+from huggingface_hub import snapshot_download
+snapshot_download(repo_id='darkthanos/osteoporosis-models', local_dir='.')
+"
 ```
 
 ### Running Locally
@@ -164,9 +191,3 @@ docker-compose up --build
 ## Clinical Disclaimer
 
 This system is intended for research and educational purposes only. It is not validated for clinical use and should not be used as a substitute for professional medical diagnosis or advice.
-
----
-
-## License
-
-[Add license here]
