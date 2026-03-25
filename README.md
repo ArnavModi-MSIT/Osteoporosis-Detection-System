@@ -1,48 +1,43 @@
 # 🦴 Multi-Modal Osteoporosis Detection System
 
-A production-oriented machine learning system for osteoporosis risk prediction using multi-modal data fusion. The system integrates X-ray image analysis (CNN) and clinical data modeling (XGBoost), enhanced with LLM-based clinical explanations using RAG (FAISS + Ollama).
+A production-oriented machine learning system for osteoporosis risk prediction using **multi-modal data fusion**.  
+This project integrates **X-ray image analysis (CNN)** and **clinical risk modeling (XGBoost)**, enhanced with **LLM-based clinical explanations using Retrieval-Augmented Generation (RAG)**.
 
 ---
 
-## 🚀 Features
+## 🚀 Overview
 
-- Dual-model architecture (CNN + XGBoost)
-- Adaptive input routing (image / text / fusion)
-- Weighted fusion for improved prediction
-- Explainable AI using RAG + LLM
-- Dockerized deployment
+Osteoporosis diagnosis in real-world clinical settings relies on both **imaging data** (X-rays, scans) and **patient-specific risk factors** (age, medical history, lifestyle).
 
----
+This system simulates a **real-world diagnostic pipeline** by:
 
-## 🏗️ Architecture
-
-User Input → CNN / XGBoost → Fusion → Prediction → FAISS → LLM → Explanation
+- Processing heterogeneous inputs (image + structured data)
+- Performing modality-specific inference
+- Combining predictions via a fusion layer
+- Generating clinically grounded explanations using an LLM
 
 ---
 
-## ⚙️ Setup
+## ✨ Key Features
 
-git clone <your-repo>
-cd <your-repo>
-docker compose up --build
-
----
-
-## 📡 Endpoints
-
-- /predict/text
-- /predict/image
-- /predict/fusion
-- /explain
+### 🧠 Multi-Modal Learning
+- **CNN (EfficientNet-B0)** for X-ray image analysis  
+- **XGBoost** for structured clinical data  
+- Handles **image-only**, **text-only**, and **combined inputs**
 
 ---
 
-## ⚠️ Notes
+### 🔀 Adaptive Input Routing
+Automatically detects available input type:
 
-Models and FAISS index are downloaded from Hugging Face at runtime.
+| Input Type | Pipeline |
+|----------|---------|
+| Image only | CNN |
+| Clinical data only | XGBoost |
+| Both | Weighted fusion |
 
 ---
 
-## 👨‍💻 Author
-
-Arnav Modi
+### ⚖️ Fusion Layer
+- Combines predictions from both modalities  
+- Uses weighted averaging:
