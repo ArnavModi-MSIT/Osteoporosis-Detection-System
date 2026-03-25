@@ -32,11 +32,11 @@ Each modality is trained and evaluated independently before being integrated int
 
 The system automatically detects which input modalities are available and routes accordingly:
 
-| Input Type            | Inference Pipeline |
-|-----------------------|--------------------|
-| Image only            | CNN                |
-| Clinical data only    | XGBoost            |
-| Both                  | Weighted fusion    |
+| Input Type             | Inference Pipeline |
+|------------------------|--------------------|
+| Image only             | CNN                |
+| Clinical data only     | XGBoost            |
+| Both                   | Weighted fusion    |
 
 This design ensures graceful degradation in partial-data scenarios — a common occurrence in real-world clinical environments.
 
@@ -84,45 +84,59 @@ Input
 
 ## Project Structure
 
+This is what you get after cloning the repository. Model weights, indexes, and data files are not included — see the [Hugging Face section](#hugging-face-model-repository) below.
+
 ```
-OSTEOPOROSIS/
-├── faiss_index/                     # FAISS vector index for RAG retrieval
-├── knowledge_base/                  # Clinical documents used for RAG context
-├── archive/                         # Archived experiments and outputs
-├── cnn.py                           # EfficientNet-B0 inference pipeline
-├── xg_boost.py                      # XGBoost inference pipeline
-├── fusion.py                        # Weighted fusion of modality predictions
-├── llm.py                           # RAG-based clinical explanation generator
-├── main.py                          # Main entry point
-├── osteoporosis.csv                 # Clinical training/evaluation dataset
-├── cnn_image_branch_scores.csv      # CNN prediction output scores
-├── xgb_text_branch_scores.csv       # XGBoost prediction output scores
-├── efficientnetb0_osteoporosis.pth  # CNN model weights (download from HF)
-├── xg_model.joblib                  # XGBoost model (download from HF)
-├── label_encoders.joblib            # Fitted label encoders (download from HF)
-├── requirements.txt                 # Python dependencies
-├── Dockerfile                       # Container definition
-├── docker-compose.yml               # Multi-service container orchestration
+osteoporosis/
+├── cnn.py                # EfficientNet-B0 inference pipeline
+├── xg_boost.py           # XGBoost inference pipeline
+├── fusion.py             # Weighted fusion of modality predictions
+├── llm.py                # RAG-based clinical explanation generator
+├── main.py               # Main entry point
+├── requirements.txt      # Python dependencies
+├── Dockerfile            # Container definition
+├── docker-compose.yml    # Multi-service container orchestration
+├── README.md
 ├── .dockerignore
 └── .gitignore
 ```
+
+> The following are downloaded from Hugging Face before running (see setup steps below):
+> `efficientnetb0_osteoporosis.pth`, `xg_model.joblib`, `label_encoders.joblib`, `faiss_index/`, `knowledge_base/`
 
 ---
 
 ## Hugging Face Model Repository
 
-Large model files and supporting assets are hosted on Hugging Face at:  
+All model weights and supporting assets are hosted at:  
 **[darkthanos/osteoporosis-models](https://huggingface.co/darkthanos/osteoporosis-models)**
 
-| File                              | Size    | Description                          |
-|-----------------------------------|---------|--------------------------------------|
-| `efficientnetb0_osteoporosis.pth` | 17 MB   | EfficientNet-B0 CNN weights          |
-| `xg_model.joblib`                 | 1.92 MB | Trained XGBoost model                |
-| `label_encoders.joblib`           | 3.47 kB | Fitted label encoders for clinical features |
-| `faiss_index/`                    | —       | FAISS vector index for RAG retrieval |
-| `knowledge_base/`                 | —       | Clinical knowledge base documents    |
+| File                              | Description                                  |
+|-----------------------------------|----------------------------------------------|
+| `efficientnetb0_osteoporosis.pth` | EfficientNet-B0 CNN weights                  |
+| `xg_model.joblib`                 | Trained XGBoost model                        |
+| `label_encoders.joblib`           | Fitted label encoders for clinical features  |
+| `faiss_index/`                    | FAISS vector index for RAG retrieval         |
+| `knowledge_base/`                 | Clinical knowledge base documents            |
 
-### Downloading Model Files
+---
+
+## Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/ArnavModi-MSIT/osteoporosis.git
+cd osteoporosis
+```
+
+### 2. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Download Model Weights and Assets
 
 ```python
 from huggingface_hub import snapshot_download
@@ -143,26 +157,7 @@ hf_hub_download(repo_id="darkthanos/osteoporosis-models", filename="xg_model.job
 hf_hub_download(repo_id="darkthanos/osteoporosis-models", filename="label_encoders.joblib", local_dir=".")
 ```
 
----
-
-## Getting Started
-
-### Prerequisites
-
-```bash
-pip install -r requirements.txt
-```
-
-### Download Model Weights
-
-```bash
-python -c "
-from huggingface_hub import snapshot_download
-snapshot_download(repo_id='darkthanos/osteoporosis-models', local_dir='.')
-"
-```
-
-### Running Locally
+### 4. Run the Pipeline
 
 ```bash
 python main.py --image path/to/xray.png --clinical path/to/patient_data.csv
