@@ -1,0 +1,48 @@
+services:
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  ollama-pull:
+    image: ollama/ollama:latest
+    container_name: ollama-pull
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: ["ollama", "pull", "mistral"]
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: "no" 
+
+  osteo-api:
+    build: .
+    container_name: osteo-api
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_URL=http://ollama:11434/api/generate
+      - HF_TOKEN=${HF_TOKEN}
+    volumes:
+      - hf_cache:/root/.cache/huggingface  
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+  hf_cache:   

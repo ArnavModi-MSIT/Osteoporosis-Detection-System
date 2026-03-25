@@ -1,0 +1,15 @@
+.venv
+env
+__pycache__
+*.pyc
+
+archive/
+faiss_index/
+knowledge_base/
+
+*.pth
+*.joblib
+*.csv
+
+.git
+.gitignore
